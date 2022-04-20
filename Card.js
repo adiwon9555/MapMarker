@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Dimensions,
   Animated,
+  PanResponder
 } from "react-native";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -27,12 +28,33 @@ const Card = ({ itemData, closeBottomSlider }) => {
     sqft:ft = '-',
   } = itemData || {};
 
-  const animatedValue = React.useRef(new Animated.Value(0))
+  const panY = useRef(new Animated.Value(height)).current;
 
-  const bottom = animatedValue.current.interpolate({
-    inputRange: [0, 1],
-    outputRange: [height, CARD_HEIGHT],
-  })
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => false,
+      onPanResponderMove: Animated.event(
+        [
+          null,
+          { dy: panY }
+        ]
+      ),
+      onPanResponderRelease: (e, gs) => {
+        if (gs.dy > 0 && gs.vy > 0) {
+          return hideCard()
+        }
+        return showCard()
+      }
+    })
+  ).current;
+
+  const translateY = panY.interpolate({
+    inputRange: [-1, CARD_HEIGHT,height],
+    outputRange: [CARD_HEIGHT, CARD_HEIGHT,height],
+  });
+
 
   const image = useMemo(()=>{
     return getRandomImages();
@@ -44,18 +66,18 @@ const Card = ({ itemData, closeBottomSlider }) => {
   }, [])
 
   const showCard=()=>{
-    Animated.timing(animatedValue.current, {
-      toValue: 1,
+    Animated.timing(panY, {
+      toValue: CARD_HEIGHT,
       duration: 300,
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start()
   }
 
   const hideCard=()=>{
-    Animated.timing(animatedValue.current, {
-      toValue: 0,
+    Animated.timing(panY, {
+      toValue: height,
       duration: 300,
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start(()=>{
       closeBottomSlider()
     })
@@ -70,10 +92,12 @@ const Card = ({ itemData, closeBottomSlider }) => {
         flex: 1,
         width: width,
         height: "100%",
-      },{transform: [{ translateY: bottom }]}]}
+        transform: [{translateY: translateY}]
+      }]}
+      {...panResponder.panHandlers}
     >
       
-      <TouchableWithoutFeedback onPress={hideCard}>
+      {/* <TouchableWithoutFeedback onPress={hideCard}> */}
         <View style={styles.card}>
           <Image
             source={{ uri: image }}
@@ -108,7 +132,7 @@ const Card = ({ itemData, closeBottomSlider }) => {
             </View>
           </View>
         </View>
-      </TouchableWithoutFeedback>
+      {/* </TouchableWithoutFeedback> */}
     </Animated.View>
   );
 };
