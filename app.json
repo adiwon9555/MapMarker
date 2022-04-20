@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "maps-interview",
+    "slug": "maps-interview",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "maps-interview"
+}
