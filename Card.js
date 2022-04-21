@@ -35,6 +35,9 @@ const Card = ({ itemData, closeBottomSlider }) => {
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => false,
+      onPanResponderGrant: () => {
+        panY.setOffset(CARD_HEIGHT)
+      },
       onPanResponderMove: Animated.event(
         [
           null,
@@ -42,16 +45,16 @@ const Card = ({ itemData, closeBottomSlider }) => {
         ]
       ),
       onPanResponderRelease: (e, gs) => {
-        if (gs.dy > 0 && gs.vy > 0) {
+        if (gs.dy > 0) {
           return hideCard()
+        }else{
         }
-        return showCard()
       }
     })
   ).current;
 
   const translateY = panY.interpolate({
-    inputRange: [-1, CARD_HEIGHT,height],
+    inputRange: [-CARD_HEIGHT, CARD_HEIGHT,height],
     outputRange: [CARD_HEIGHT, CARD_HEIGHT,height],
   });
 
